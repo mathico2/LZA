@@ -4,15 +4,18 @@ mandatoryAccounts:
   # The "name" value DOES NOT need to match the account name
   - name: Management
     description: The management (primary) account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: <management-account>@example.com <----- UPDATE EMAIL ADDRESS
+    #email: <management-account>@example.com <----- UPDATE EMAIL ADDRESS
+    email: mathico2@outlook.com
     organizationalUnit: Root
   - name: LogArchive
     description: The log archive account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: <log-archive>@example.com  <----- UPDATE EMAIL ADDRESS
+    #email: <log-archive>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: log_archive01@yahoo.com
     organizationalUnit: Security
   - name: Audit
     description: The security audit account (also referred to as the audit account). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
-    email: <audit>@example.com  <----- UPDATE EMAIL ADDRESS
+    #email: <audit>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: auditaws01@yahoo.com
     organizationalUnit: Security
 workloadAccounts:
   # The "name" will be used to set the AWS Account name
@@ -21,8 +24,15 @@ workloadAccounts:
   - name: SharedServices
     description: The SharedServices account
     email: <shared-services>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: sharedawsservices01@gmail.com
     organizationalUnit: Infrastructure
   - name: Network
     description: The Network account
-    email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: awschristianlogarchive01@gmail.com
     organizationalUnit: Infrastructure
+  - name: customer1
+    description: The customer1 account
+    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: awsindigosquare@gmail.com
+    organizationalUnit: workload
