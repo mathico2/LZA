@@ -1,0 +1,1 @@
+vmseries-bootstrap-aws-s3bucket=indigo-palo-bootstrapper/firewall-a

@@ -1,5 +1,41 @@
-policySets: []
+############################################################################################################
+# For additional configurable services, features, and property descriptions,                               #
+# please review class IamConfig reference in our TypeDoc:                                                  #
+# https://awslabs.github.io/landing-zone-accelerator-on-aws/classes/_aws_accelerator_config.IamConfig.html #
+############################################################################################################
+homeRegion: &HOME_REGION us-east-1
+
+policySets:
+  - deploymentTargets:
+      organizationalUnits:
+        - Root
+    policies:
+      - name: Default-Boundary-Policy
+        policy: iam-policies/boundary-policy.json  
+  - deploymentTargets:
+      accounts:
+        - Network
+    policies:
+      - name: NGFW-Policy
+        policy: iam-policies/ngfw-policy.json
 roleSets:
+  - deploymentTargets:
+      accounts:
+        - Network
+    roles:
+      - name: NGFW-Profile
+        instanceProfile: true
+        assumedBy:
+          - type: service
+            principal: ec2.amazonaws.com
+        policies:
+          awsManaged:
+            - AmazonSSMManagedInstanceCore
+            - CloudWatchAgentServerPolicy
+            # For hairpin testing purposes only
+            # - AmazonEC2ReadOnlyAccess
+          customerManaged:
+            - NGFW-Policy
   - deploymentTargets:
       organizationalUnits:
         - Root
@@ -14,26 +50,231 @@ roleSets:
             - AmazonSSMManagedInstanceCore
             - AmazonSSMDirectoryServiceAccess
             - CloudWatchAgentServerPolicy
-      # This role is utilized by the Backup Plans defined in global-config.yaml
-      # We create this role in every account where we plan to have Backup Plans
-      # and Backup Vaults
-      - name: Backup-Role
-        assumedBy:
-          - type: service
-            principal: backup.amazonaws.com
-        policies:
-          awsManaged:
-            - service-role/AWSBackupServiceRolePolicyForBackup
-            - service-role/AWSBackupServiceRolePolicyForRestores
-      # This role is utilized by the Budgets Config defined in global-config.yaml
-      # We create this role in every account where we plan to have AWS Budgets
-      # A service linked role is not available for AWS Budgets
-      - name: Budgets-Role
-        assumedBy:
-          - type: service
-            principal: budgets.amazonaws.com
-        policies:
-          awsManaged:
-            - AWSBudgetsActionsWithAWSResourceControlAccess
 groupSets: []
 userSets: []
+
+#######################################################################################################################
+# AWS IAM Identity Center configuration                                                                               #
+# For AWS Control Tower based installation, AWS Identity Center is enabled automatically                              #
+# Tasks that be performed in the delegated administrator account                                                      #
+# https://docs.aws.amazon.com/singlesignon/latest/userguide/delegated-admin.html#delegated-admin-tasks-member-account #
+#######################################################################################################################
+identityCenter:
+  name: IdentityCenter
+  # Assigning delegated administration as Audit account
+  # Preview review AWS Security Reference Architecture for assigning other account as delegated administrator
+  # https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/shared-services.html
+  delegatedAdminAccount: SharedServices
+  # Predefined permission sets
+  # https://docs.aws.amazon.com/singlesignon/latest/userguide/permissionsetpredefined.html
+  identityCenterPermissionSets:
+    # Creating permission sets
+    - name: AWSAccelerator-Billing
+    # Attaching policy
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/Billing
+      # Setting session duration
+      sessionDuration: 60
+    - name: AWSAccelerator-DatabaseAdmin
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/DatabaseAdministrator
+      sessionDuration: 60
+    - name: AWSAccelerator-DataScientist
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/DataScientist
+      sessionDuration: 60
+    - name: AWSAccelerator-NetworkAdmin
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/NetworkAdministrator
+      sessionDuration: 60
+    - name: AWSAccelerator-ReadOnlyAccess
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/ReadOnlyAccess
+      sessionDuration: 60
+    - name: AWSAccelerator-SecurityAudit
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/SecurityAudit
+      sessionDuration: 60
+    - name: AWSAccelerator-SupportUser
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/SupportUser
+      sessionDuration: 60
+    - name: AWSAccelerator-SystemAdmin
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/job-function/SystemAdministrator
+      sessionDuration: 60
+    - name: AWSAccelerator-indigoAdminAccess #global admin, access isn't impacted by guardrails
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/AdministratorAccess          
+      sessionDuration: 480
+    - name: AWSAccelerator-LimitedAdminAccess #This role gets restricted in the guardrails. So unless you're on indigo you are ADMIN minus whatever we disable.
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/AdministratorAccess          
+      sessionDuration: 480      
+    - name: AWSAccelerator-SharedSrv-Dev
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess
+          - arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess
+      sessionDuration: 480
+    - name: AWSAccelerator-SharedSrv-PwrUsr
+      policies:
+        awsManaged:
+          - arn:aws:iam::aws:policy/PowerUserAccess
+      sessionDuration: 60
+
+identityCenterAssignments:
+#  - name: indigoAdmins
+#    permissionSetName: AWSAccelerator-AdminAccess
+#    principals:
+#      - type: GROUP
+#        name: indigo_Admins
+#    deploymentTargets:
+#      accounts:
+#       - Management
+#        - LogArchive
+#        - Audit
+#        - ReadyOneDev
+#        - CMPLiteGC
+#        - tenjinGC
+#        - SharedServices
+#        - Network
+  - name: SharedServicesDevs
+    permissionSetName: AWSAccelerator-SharedSrv-Dev
+    principals:
+      - type: GROUP
+        name: indigo_SharedService_Developers
+    #principalId: "a4e81468-1001-70f0-9c12-56a6aa967ca4"
+    #principalType: USER
+    deploymentTargets:
+      accounts:
+        - SharedServices
+  - name: ShareservicesPowerUsers
+    permissionSetName: AWSAccelerator-SharedSrv-PwrUsr
+    principals:
+      - type: GROUP
+        name: indigo_SharedService_PowerUsers
+    #principalId: "a4e81468-1001-70f0-9c12-56a6aa967ca4"
+    #principalType: USER
+    deploymentTargets:
+      accounts:
+        - SharedServices
+managedActiveDirectories:
+ - name: AcceleratorManagedActiveDirectory
+   type: AWS Managed Microsoft AD
+   account: SharedServices
+   region: *HOME_REGION
+   dnsName: indigo.com
+   netBiosDomainName: indigo
+   description: indigo managed active directory
+   edition: Standard
+   resolverRuleName: accelerator-outbound-rule
+   vpcSettings:
+     vpcName: SharedServices-Main
+     subnets:
+       - SharedServices-Main-App-A
+       - SharedServices-Main-App-B
+   secretConfig:
+     account: SharedServices
+     region: *HOME_REGION
+     adminSecretName: ActiveDirectoryAdmin
+   sharedOrganizationalUnits:
+     organizationalUnits:
+       - Root
+     #excludedAccounts:
+     #  - Management
+   logs:
+     groupName: /aws/directoryservice/AcceleratorManagedActiveDirectory
+     retentionInDays: 30      
+
+   activeDirectoryConfigurationInstance:
+     instanceType: t3.large
+     vpcName: SharedServices-Main
+     subnetName: SharedServices-Main-App-A
+     imagePath: /aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base
+     securityGroupInboundSources:
+       - 10.0.0.0/16
+     instanceRole: EC2-Default-SSM-AD-Role
+     enableTerminationProtection: false
+     userDataScripts:
+       - scriptName: JoinDomain
+         scriptFilePath: ad-config-scripts/Join-Domain.ps1
+#       - scriptName: InitializeRDGW ## Do not Need
+#         scriptFilePath: ad-config-scripts/Initialize-RDGW.ps1
+       - scriptName: AWSQuickStart
+         scriptFilePath: ad-config-scripts/AWSQuickStart.psm1
+       - scriptName: ADGroupSetup
+         scriptFilePath: ad-config-scripts/AD-group-setup.ps1
+       - scriptName: ADUserSetup
+         scriptFilePath: ad-config-scripts/AD-user-setup.ps1
+       - scriptName: ADUserGroupSetup
+         scriptFilePath: ad-config-scripts/AD-user-group-setup.ps1
+       - scriptName: ADGroupGrantPermissionsSetup
+         scriptFilePath: ad-config-scripts/AD-group-grant-permissions-setup.ps1
+       - scriptName: ADConnectorPermissionsSetup
+         scriptFilePath: ad-config-scripts/AD-connector-permissions-setup.ps1
+       - scriptName: ConfigurePasswordPolicy
+         scriptFilePath: ad-config-scripts/Configure-password-policy.ps1
+     adGroups:
+       - aws-Provisioning
+       - aws-Billing
+     adPerAccountGroups:
+       - "*-Admin"
+       - "*-PowerUser"
+       - "*-View"
+     adConnectorGroup: ADConnector-grp
+     sharedAccounts:
+       - Management
+       - Audit
+       - LogArchive
+     adPasswordPolicy:
+       history: 24
+       maximumAge: 90
+       minimumAge: 1
+       minimumLength: 14
+       complexity: true
+       reversible: false
+       failedAttempts: 6
+       lockoutDuration: 30
+       lockoutAttemptsReset: 30
+     adUsers:
+       - name: ADConnectorUser
+         email: example-adconnector-usr@example.com
+         groups:
+           - ADConnector-grp
+        #spaces not allowed in name field
+       - name: brian.l.bauer
+         email: brian.l.bauer@saic.com
+         groups:
+           - aws-Provisioning
+           - "*-View"
+           - "*-Admin"
+           - "*-PowerUser"
+           - AWS Delegated Administrators
+        #spaces not allowed in name field
+       - name: chris.c.steinheiser
+         email: christopher.c.steinheiser.ctr@army.mil
+         groups:
+           - aws-Provisioning
+           - "*-View"
+           - "*-Admin"
+           - "*-PowerUser"
+           - AWS Delegated Administrators
+       - name: richard.a.wagner
+         email: richard.a.wagner@saic.com
+         groups:
+           - AWS Delegated Administrators           
+
+
+Feedback
+Language

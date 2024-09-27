@@ -1,24 +1,44 @@
+####################################################################################################################
+# For additional configurable services, features, and property descriptions,                                        #
+# please review class NetworkConfig reference in our TypeDoc:                                                       #
+# https://awslabs.github.io/landing-zone-accelerator-on-aws/classes/_aws_accelerator_config.OrganizationConfig.html #
+#####################################################################################################################
+
 # If using AWS Control Tower, ensure that all the specified Organizational Units (OU)
 # have been created and enrolled as the accelerator will verify that the OU layout
 # matches before continuing to execute the deployment pipeline.
 
+###################################################################
+# AWS Organizations and Organizational Units (OUs) Configurations #
+###################################################################
 enable: true
+# Creating OUs
 organizationalUnits:
   - name: Security
   - name: Infrastructure
+  - name: WorkloadAccounts
+  - name: WorkloadAccounts/SandboxZone
+  - name: WorkloadAccounts/TestingZone
+  - name: WorkloadAccounts/CodingZone
+# Enabling the quarantine service control policies (SCPs)
 quarantineNewAccounts:
   enable: true
   scpPolicyName: Quarantine
+# Implementing service control policies
 serviceControlPolicies:
+  # Creating an SCP
   - name: AcceleratorGuardrails1
     description: >
       Accelerator GuardRails 1
+    # Path to policy
     policy: service-control-policies/guardrails-1.json
     type: customerManaged
+    # Attaching service control policy to accounts through OUs
     deploymentTargets:
       organizationalUnits:
-        - Infrastructure
-        - Security
+       # - Infrastructure
+       # - Security
+        - WorkloadAccounts
   - name: AcceleratorGuardrails2
     description: >
       Accelerator GuardRails 2
@@ -26,8 +46,57 @@ serviceControlPolicies:
     type: customerManaged
     deploymentTargets:
       organizationalUnits:
-        - Infrastructure
-        - Security
+      # - Infrastructure
+      #  - Security
+        - WorkloadAccounts
+
+#### APPLY TO ALL WORKLOAD ACCOUNTS
+  - name: AcceleratorGuardrails-PreventInternetIfNotAlready
+    description: >
+      Accelerator GuardRails PreventInternetIfNotAlready
+    policy: service-control-policies/LZA-Guardrails-PreventInternetIfNotAlready.json
+    type: customerManaged
+    deploymentTargets:
+      organizationalUnits:
+      # - Infrastructure
+      #  - Security
+        - WorkloadAccounts
+
+##ZONE BASED POLICIES 
+  # - name: AcceleratorGuardrails-SandboxZone
+  #   description: >
+  #     Accelerator GuardRails Sandbox Zone
+  #   policy: service-control-policies/LZA-Guardrails-Sandbox-Zone.json
+  #   type: customerManaged
+  #   deploymentTargets:
+  #     organizationalUnits:
+  #     # - Infrastructure
+  #     #  - Security
+  #       - WorkloadAccounts/Sandbox     
+  # - name: AcceleratorGuardrails-TestingZone
+  #   description: >
+  #     Accelerator GuardRails Testing Zone
+  #   policy: service-control-policies/LZA-Guardrails-Testing-Zone.json
+  #   type: customerManaged
+  #   deploymentTargets:
+  #     organizationalUnits:
+  #     # - Infrastructure
+  #     #  - Security
+  #       - WorkloadAccounts/TestingZone
+
+  # - name: AcceleratorGuardrails-CodingZone
+  #   description: >
+  #     Accelerator GuardRails Coding Zone
+  #   policy: service-control-policies/LZA-Guardrails-Coding-Zone.json
+  #   type: customerManaged
+  #   deploymentTargets:
+  #     organizationalUnits:
+  #     # - Infrastructure
+  #     #  - Security
+  #       - WorkloadAccounts/CodingZone   
+
+
+## QUARANTINE NEW OBJECTS
   - name: Quarantine
     description: >
       This SCP is used to prevent changes to new accounts until the Accelerator
@@ -37,22 +106,11 @@ serviceControlPolicies:
     type: customerManaged
     deploymentTargets:
       organizationalUnits: []
+
 # https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html
-taggingPolicies:
-  - name: TagPolicy
-    description: Organization Tagging Policy
-    policy: tagging-policies/org-tag-policy.json
-    deploymentTargets:
-      organizationalUnits:
-        - Root
+taggingPolicies: []
 # https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_backup.html
-# backup policies contain a `delete_after_days` value of 1095 days, or 3 years.  Before
-# enabling this policy, ensure that `delete_after_days` meets your organization's records retention
-# policies.  Similarly, ensure that `move_to_cold_storage_after_days` meets business requirements.
-backupPolicies:
-  - name: BackupPolicy
-    description: Organization Backup Policy
-    policy: backup-policies/backup-plan.json
-    deploymentTargets:
-      organizationalUnits:
-        - Root
+backupPolicies: []
+
+Feedback
+Language
