@@ -1,0 +1,41 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "PreventInternetIfNotAlready",
+        "Effect": "Deny",
+        "Action": [
+            "ec2:AttachInternetGateway",
+            "ec2:CreateInternetGateway",
+            "ec2:CreateEgressOnlyInternetGateway",
+            "ec2:CreateVpcPeeringConnection",
+            "ec2:AcceptVpcPeeringConnection",
+            "ec2:CreateClientVpnRoute",
+            "ec2:CreateCustomerGateway",
+            "ec2:CreateDhcpOptions",
+            "ec2:CreateLocalGatewayRouteTableVpc*",
+            "ec2:CreateNatGateway",
+            "ec2:CreateNetworkAcl",
+            "ec2:CreateNetworkAclEntry",
+            "ec2:CreateRoute",
+            "ec2:CreateRouteTable",
+            "ec2:CreateSubnet",
+            "ec2:CreateTraffic*",
+            "ec2:CreateTransit*",
+            "ec2:CreateVp*",
+          "globalaccelerator:Create*",
+          "globalaccelerator:Update*"
+        ],
+        "Resource": "*",
+        "Condition": {
+            "ArnNotLike": {
+                "aws:PrincipalARN": [
+                "arn:${PARTITION}:iam::*:role/${ACCELERATOR_PREFIX}-SPDSAdminAccess*",
+                "arn:${PARTITION}:iam::*:role/${MANAGEMENT_ACCOUNT_ACCESS_ROLE}",
+                "arn:${PARTITION}:iam::*:role/cdk-accel-*"
+                ]
+            }
+        }
+      }
+    ]
+  }
