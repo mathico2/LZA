@@ -56,5 +56,9 @@ accountIds:
   - email: log_archive01@yahoo.com
     accountId: '891612544213'   
   - email: auditaws01@yahoo.com
-    accountId: '050451371445'  
+    accountId: '050451371445' 
+  - email: sharedawsservices01@gmail.com 
+    accountId: ''
+ -  email: awschristianlogarchive01@gmail.com 
+    accountId: ''
    

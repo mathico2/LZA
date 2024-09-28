@@ -15,7 +15,7 @@ enable: true
 # Creating OUs
 organizationalUnits:
   - name: Security
-  - name: Workload
+  #- name: Workload
   #- name: Forensic
   #- name: Suspend
   - name: Infrastructure
