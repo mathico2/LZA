@@ -1,383 +1,758 @@
-#################################################################################################################
-# For additional configurable services, features, and property descriptions,                                    #
-# please review class SecurityConfig reference in our TypeDoc:                                                  #
-# https://awslabs.github.io/landing-zone-accelerator-on-aws/classes/_aws_accelerator_config.SecurityConfig.html #
-#################################################################################################################
+################################################################################################################
+# For additional configurable services, features, and property descriptions,                                   #
+# please review class NetworkConfig reference in our TypeDoc:                                                  #
+# https://awslabs.github.io/landing-zone-accelerator-on-aws/classes/_aws_accelerator_config.NetworkConfig.html #
+################################################################################################################
 
-homeRegion: &HOME_REGION us-east-1
-centralSecurityServices:
-  delegatedAdminAccount: Audit
-  ebsDefaultVolumeEncryption:
-    enable: true
-    excludeRegions: []
-  s3PublicAccessBlock:
-    enable: true
-    excludeAccounts: []
-  scpRevertChangesConfig:
-    enable: true
-    snsTopicName: Security
-  macie:
-    enable: false
-    excludeRegions: []
-    policyFindingsPublishingFrequency: FIFTEEN_MINUTES
-    publishSensitiveDataFindings: true
-  guardduty:
-    enable: true
-    excludeRegions: []
-    s3Protection:
-      enable: true
-      excludeRegions: []
-    exportConfiguration:
-      enable: true
-      overrideExisting: true
-      destinationType: S3
-      exportFrequency: FIFTEEN_MINUTES
-  ##################################################################################################################
-  # AWS Security Hub Configurations                                                                                #
-  ##################################################################################################################
-  securityHub:
-    enable: true
-    regionAggregation: true
-    excludeRegions: []
-    standards:
-      #############################################################################################################
-      # Enable AWS Security Hub standards based upon a customer specific requirements                             #
-      # For the standard configuration, we have enabled the following standards:                                          #
-      # - AWS Foundational Security Best Practices (FSBP)                                                         #
-      # - Center for Internet Security (CIS) AWS Foundations Benchmark v1.4.0                                     #
-      # - National Institute of Standards and Technology (NIST) SP 800-53 Rev. 5                                  #                                                                                                       #
-      # Controls that you might want to disable based upon Security Hub recommendation                            #
-      # https://docs.aws.amazon.com/securityhub/latest/userguide/controls-to-disable.html                         #
-      #############################################################################################################
-      - name: AWS Foundational Security Best Practices v1.0.0
-        # https://docs.aws.amazon.com/securityhub/latest/userguide/fsbp-standard.html
-        enable: true
-      - name: CIS AWS Foundations Benchmark v1.4.0
-        # https://docs.aws.amazon.com/securityhub/latest/userguide/cis-aws-foundations-benchmark.html#cis1v4-standard
-        enable: true
-      - name: NIST Special Publication 800-53 Revision 5
-        # https://docs.aws.amazon.com/securityhub/latest/userguide/nist-standard.html
-        enable: true
-  ssmAutomation:
-    excludeRegions: []
-    documentSets: []
-accessAnalyzer:
-  enable: true
-iamPasswordPolicy:
-  allowUsersToChangePassword: true
-  hardExpiry: false
-  requireUppercaseCharacters: true
-  requireLowercaseCharacters: true
-  requireSymbols: true
-  requireNumbers: true
-  ############################################################################################
-  # The minimum password length was chosen to be 14 to align with common industry practices. #
-  # If you need to comply with NIST SP 800-63B you can modify the password length to 8.      #
-  ############################################################################################
-  minimumPasswordLength: 14
-  passwordReusePrevention: 24
-  maxPasswordAge: 90
-awsConfig:
-  enableConfigurationRecorder: true
-  enableDeliveryChannel: true
-  ruleSets: []
-cloudWatch:
-  metricSets:
-    - regions:
-        - *HOME_REGION
-      deploymentTargets:
-        accounts:
-          - Management
-      metrics:
-        # CIS 1.1 – Avoid the use of the "root" account
-        - filterName: RootAccountMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: '{$.userIdentity.type="Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType !="AwsServiceEvent"}'
-          metricNamespace: LogMetrics
-          metricName: RootAccount
-          metricValue: "1"
-        # CIS 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls
-        - filterName: UnauthorizedAPICallsMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: '{($.errorCode="*UnauthorizedOperation") || ($.errorCode="AccessDenied*")}'
-          metricNamespace: LogMetrics
-          metricName: UnauthorizedAPICalls
-          metricValue: "1"
-        # CIS 3.2 – Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA
-        - filterName: ConsoleSigninWithoutMFAMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: '{($.eventName = "ConsoleLogin") && ($.additionalEventData.MFAUsed != "Yes") && ($.userIdentity.type = "IAMUser") && ($.responseElements.ConsoleLogin = "Success")}'
-          metricNamespace: LogMetrics
-          metricName: ConsoleSigninWithoutMFA
-          metricValue: "1"
-        # CIS 3.3 – Ensure a log metric filter and alarm exist for usage of "root" account
-        - filterName: MetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: '{$.userIdentity.type="Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType !="AwsServiceEvent"}'
-          metricNamespace: LogMetrics
-          metricName: RootAccountUsage
-          metricValue: "1"
-        # CIS 3.4 – Ensure a log metric filter and alarm exist for IAM policy changes
-        - filterName: IAMPolicyChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=DeleteGroupPolicy) || ($.eventName=DeleteRolePolicy) || ($.eventName=DeleteUserPolicy) || ($.eventName=PutGroupPolicy) || ($.eventName=PutRolePolicy) || ($.eventName=PutUserPolicy) || ($.eventName=CreatePolicy) || ($.eventName=DeletePolicy) || ($.eventName=CreatePolicyVersion) || ($.eventName=DeletePolicyVersion) || ($.eventName=AttachRolePolicy) || ($.eventName=DetachRolePolicy) || ($.eventName=AttachUserPolicy) || ($.eventName=DetachUserPolicy) || ($.eventName=AttachGroupPolicy) || ($.eventName=DetachGroupPolicy)}"
-          metricNamespace: LogMetrics
-          metricName: IAMPolicyChanges
-          metricValue: "1"
-        # CIS 3.5 – Ensure a log metric filter and alarm exist for CloudTrail configuration changes
-        - filterName: CloudTrailChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=CreateTrail) || ($.eventName=UpdateTrail) || ($.eventName=DeleteTrail) || ($.eventName=StartLogging) || ($.eventName=StopLogging)}"
-          metricNamespace: LogMetrics
-          metricName: CloudTrailChanges
-          metricValue: "1"
-        # CIS 3.6 – Ensure a log metric filter and alarm exist for AWS Management Console authentication failures
-        - filterName: ConsoleAuthenticationFailureMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: '{($.eventName=ConsoleLogin) && ($.errorMessage="Failed authentication")}'
-          metricNamespace: LogMetrics
-          metricName: ConsoleAuthenticationFailure
-          metricValue: "1"
-        # CIS 3.7 – Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs
-        - filterName: DisableOrDeleteCMKMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventSource=kms.amazonaws.com) && (($.eventName=DisableKey) || ($.eventName=ScheduleKeyDeletion))}"
-          metricNamespace: LogMetrics
-          metricName: DisableOrDeleteCMK
-          metricValue: "1"
-        # CIS 3.8 – Ensure a log metric filter and alarm exist for S3 bucket policy changes
-        - filterName: S3BucketPolicyChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventSource=s3.amazonaws.com) && (($.eventName=PutBucketAcl) || ($.eventName=PutBucketPolicy) || ($.eventName=PutBucketCors) || ($.eventName=PutBucketLifecycle) || ($.eventName=PutBucketReplication) || ($.eventName=DeleteBucketPolicy) || ($.eventName=DeleteBucketCors) || ($.eventName=DeleteBucketLifecycle) || ($.eventName=DeleteBucketReplication))}"
-          metricNamespace: LogMetrics
-          metricName: S3BucketPolicyChanges
-          metricValue: "1"
-        # CIS 3.9 – Ensure a log metric filter and alarm exist for AWS Config configuration changes
-        - filterName: AWSConfigChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventSource=config.amazonaws.com) && (($.eventName=StopConfigurationRecorder) || ($.eventName=DeleteDeliveryChannel) || ($.eventName=PutDeliveryChannel) || ($.eventName=PutConfigurationRecorder))}"
-          metricNamespace: LogMetrics
-          metricName: AWSConfigChanges
-          metricValue: "1"
-        # CIS 3.10 – Ensure a log metric filter and alarm exist for security group changes
-        - filterName: SecurityGroupChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=AuthorizeSecurityGroupIngress) || ($.eventName=AuthorizeSecurityGroupEgress) || ($.eventName=RevokeSecurityGroupIngress) || ($.eventName=RevokeSecurityGroupEgress) || ($.eventName=CreateSecurityGroup) || ($.eventName=DeleteSecurityGroup)}"
-          metricNamespace: LogMetrics
-          metricName: SecurityGroupChanges
-          metricValue: "1"
-        # CIS 3.11 – Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)
-        - filterName: NetworkACLChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=CreateNetworkAcl) || ($.eventName=CreateNetworkAclEntry) || ($.eventName=DeleteNetworkAcl) || ($.eventName=DeleteNetworkAclEntry) || ($.eventName=ReplaceNetworkAclEntry) || ($.eventName=ReplaceNetworkAclAssociation)}"
-          metricNamespace: LogMetrics
-          metricName: NetworkACLChanges
-          metricValue: "1"
-        # CIS 3.12 – Ensure a log metric filter and alarm exist for changes to network gateways
-        - filterName: NetworkGatewayChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=CreateCustomerGateway) || ($.eventName=DeleteCustomerGateway) || ($.eventName=AttachInternetGateway) || ($.eventName=CreateInternetGateway) || ($.eventName=DeleteInternetGateway) || ($.eventName=DetachInternetGateway)}"
-          metricNamespace: LogMetrics
-          metricName: NetworkGatewayChanges
-          metricValue: "1"
-        # CIS 3.13 – Ensure a log metric filter and alarm exist for route table changes
-        - filterName: RouteTableChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=CreateRoute) || ($.eventName=CreateRouteTable) || ($.eventName=ReplaceRoute) || ($.eventName=ReplaceRouteTableAssociation) || ($.eventName=DeleteRouteTable) || ($.eventName=DeleteRoute) || ($.eventName=DisassociateRouteTable)}"
-          metricNamespace: LogMetrics
-          metricName: RouteTableChanges
-          metricValue: "1"
-        # CIS 3.14 – Ensure a log metric filter and alarm exist for VPC changes
-        - filterName: VPCChangesMetricFilter
-          logGroupName: aws-controltower/CloudTrailLogs
-          filterPattern: "{($.eventName=CreateVpc) || ($.eventName=DeleteVpc) || ($.eventName=ModifyVpcAttribute) || ($.eventName=AcceptVpcPeeringConnection) || ($.eventName=CreateVpcPeeringConnection) || ($.eventName=DeleteVpcPeeringConnection) || ($.eventName=RejectVpcPeeringConnection) || ($.eventName=AttachClassicLinkVpc) || ($.eventName=DetachClassicLinkVpc) || ($.eventName=DisableVpcClassicLink) || ($.eventName=EnableVpcClassicLink)}"
-          metricNamespace: LogMetrics
-          metricName: VPCChanges
-          metricValue: "1"
-  alarmSets:
-    - regions:
-        - *HOME_REGION
-      deploymentTargets:
-        accounts:
-          - Management
-      alarms:
-        # CIS 1.1 – Avoid the use of the "root" account
-        - alarmName: CIS-1.1-RootAccountUsage
-          alarmDescription: Alarm for usage of "root" account
-          snsTopicName: Security
-          metricName: RootAccountUsage
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls
-        - alarmName: CIS-3.1-UnauthorizedAPICalls
-          alarmDescription: Alarm for unauthorized API calls
-          snsTopicName: Security
-          metricName: UnauthorizedAPICalls
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Average
-          threshold: 5
-          treatMissingData: notBreaching
-        # CIS 3.2 – Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA
-        - alarmName: CIS-3.2-ConsoleSigninWithoutMFA
-          alarmDescription: Alarm for AWS Management Console sign-in without MFA
-          snsTopicName: Security
-          metricName: ConsoleSigninWithoutMFA
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.3 – Ensure a log metric filter and alarm exist for usage of "root" account
-        - alarmName: CIS-3.3-RootAccountUsage
-          alarmDescription: Alarm for usage of "root" account
-          snsTopicName: Security
-          metricName: RootAccountUsage
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.4 – Ensure a log metric filter and alarm exist for IAM policy changes
-        - alarmName: CIS-3.4-IAMPolicyChanges
-          alarmDescription: Alarm for IAM policy changes
-          snsTopicName: Security
-          metricName: IAMPolicyChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Average
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.5 – Ensure a log metric filter and alarm exist for CloudTrail configuration changes
-        - alarmName: CIS-3.5-CloudTrailChanges
-          alarmDescription: Alarm for CloudTrail configuration changes
-          snsTopicName: Security
-          metricName: CloudTrailChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.6 – Ensure a log metric filter and alarm exist for AWS Management Console authentication failures
-        - alarmName: CIS-3.6-ConsoleAuthenticationFailure
-          alarmDescription: Alarm exist for AWS Management Console authentication failures
-          snsTopicName: Security
-          metricName: ConsoleAuthenticationFailure
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.7 – Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs
-        - alarmName: CIS-3.7-DisableOrDeleteCMK
-          alarmDescription: Alarm for disabling or scheduled deletion of customer created CMKs
-          snsTopicName: Security
-          metricName: DisableOrDeleteCMK
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.8 – Ensure a log metric filter and alarm exist for S3 bucket policy changes
-        - alarmName: CIS-3.8-S3BucketPolicyChanges.
-          alarmDescription: Alarm for S3 bucket policy changes
-          snsTopicName: Security
-          metricName: S3BucketPolicyChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Average
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.9 – Ensure a log metric filter and alarm exist for AWS Config configuration changes
-        - alarmName: CIS-3.9-AWSConfigChanges
-          alarmDescription: Alarm for AWS Config configuration changes
-          snsTopicName: Security
-          metricName: AWSConfigChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.10 – Ensure a log metric filter and alarm exist for security group changes
-        - alarmName: CIS-3.10-SecurityGroupChanges
-          alarmDescription: Alarm for security group changes
-          snsTopicName: Security
-          metricName: SecurityGroupChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.11 – Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)
-        - alarmName: CIS-3.11-NetworkACLChanges
-          alarmDescription: Alarm for changes to Network Access Control Lists (NACL)
-          snsTopicName: Security
-          metricName: NetworkACLChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.12 – Ensure a log metric filter and alarm exist for changes to network gateways
-        - alarmName: CIS-3.12-NetworkGatewayChanges
-          alarmDescription: Alarm for changes to network gateways
-          snsTopicName: Security
-          metricName: NetworkGatewayChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.13 – Ensure a log metric filter and alarm exist for route table changes
-        - alarmName: CIS-3.13-RouteTableChanges
-          alarmDescription: Alarm for route table changes
-          snsTopicName: Security
-          metricName: RouteTableChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Average
-          threshold: 1
-          treatMissingData: notBreaching
-        # CIS 3.14 – Ensure a log metric filter and alarm exist for VPC changes
-        - alarmName: CIS-3.14-VPCChanges
-          alarmDescription: Alarm for VPC changes
-          snsTopicName: Security
-          metricName: VPCChanges
-          namespace: LogMetrics
-          comparisonOperator: GreaterThanOrEqualToThreshold
-          evaluationPeriods: 1
-          period: 300
-          statistic: Sum
-          threshold: 1
-          treatMissingData: notBreaching
+homeRegion: &HOME_REGION us-gov-east-1
+#####################################
+# Delete default VPCs-- use this    #
+# object to delete default VPCs in  #
+# any non-excluded accounts         #
+#####################################
+defaultVpc:
+  delete: true
+  excludeAccounts: []
+
+centralNetworkServices:
+  delegatedAdminAccount: Network
+  gatewayLoadBalancers:
+    - name: PaloAlto-GWLB
+      subnets:
+        - Inspection-Private-A
+        - Inspection-Private-B
+      vpc: Inspection-VPC
+      deletionProtection: true
+      targetGroup: PaloAlto-TargetGroup
+      endpoints:
+        - name: PaloAlto-Endpoint-A
+          account: Network
+          subnet: Inspection-Private-A
+          vpc: Inspection-VPC
+        - name: PaloAlto-Endpoint-B
+          account: Network
+          subnet: Inspection-Private-B
+          vpc: Inspection-VPC
+  ipams:
+    - name: accelerator-ipam
+      region: *HOME_REGION
+      description: Accelerator IPAM
+      operatingRegions:
+        - us-gov-east-1
+      scopes: []
+      pools:
+        - name: accelerator-us-gov-east-1-base-pool
+          description: Base IPAM pool
+          shareTargets:
+            organizationalUnits:
+              - Infrastructure
+          autoImport: true
+          provisionedCidrs:
+            - 10.0.0.0/8
+        - name: accelerator-us-gov-east-1-regional-pool
+          description: Regional pool for us-gov-east-1
+          shareTargets:
+            organizationalUnits:
+              - Infrastructure
+          locale: us-gov-east-1
+          autoImport: true
+          provisionedCidrs:
+            - 10.0.0.0/16
+          sourceIpamPool: accelerator-us-gov-east-1-base-pool
+        - name: accelerator-us-gov-east-1-dev-pool
+          description: Regional pool for dev environment in the us-gov-east-1region
+          shareTargets:
+            organizationalUnits:
+              - WorkloadAccounts  
+          locale: us-gov-east-1
+          autoImport: true
+          provisionedCidrs:
+            - 10.0.16.0/21
+          sourceIpamPool: accelerator-us-gov-east-1-regional-pool       
+  route53Resolver:
+    endpoints:
+      - name: accelerator-outbound
+        type: OUTBOUND
+        vpc: Inspection-VPC
+        allowedCidrs:
+          - 10.0.0.0/16
+        subnets:
+          - Inspection-Private-A
+          - Inspection-Private-B
+        rules:
+          - name: accelerator-outbound-rule
+            domainName: spds.com
+            ruleType: FORWARD
+            shareTargets:
+              organizationalUnits:
+                - Root
+            targetIps:
+              - ip: 1.1.1.1          
+  
+# Transit Gateway Configurations
+transitGateways:
+  - name: Network-Main
+    account: Network
+    region: *HOME_REGION
+    shareTargets:
+      organizationalUnits:
+        - Infrastructure
+        - WorkloadAccounts
+    asn: 65521
+    dnsSupport: enable
+    vpnEcmpSupport: enable
+    defaultRouteTableAssociation: disable
+    defaultRouteTablePropagation: disable
+    autoAcceptSharingAttachments: enable
+    # Adding transit gateway route tables
+    routeTables:
+      - name: Network-Main-Transit
+        routes: []
+      - name: Network-Main-Central-Inspection
+        routes:
+          - destinationCidrBlock: 0.0.0.0/0
+            attachment:
+              account: Network
+              vpcName: Inspection-VPC
+
+#####################################
+# Endpoint policies -- use this     #
+# object to define standard policies #
+# for VPC endpoints                 #
+#####################################
+endpointPolicies:
+  - name: Default
+    document: vpc-endpoint-policies/default.json
+  - name: Ec2
+    document: vpc-endpoint-policies/ec2.json
+
+#####################################
+# VPCs-- use this object to deploy  #
+# a VPC in a single account and     #
+# region.                           #
+#####################################
+vpcs:
+  #RFC 1918 Range
+  # 10.0.0.0 - 10.255.255.255 (10/8 prefix)
+  # 172.16.0.0 - 172.31.255.255 (172.16/12 prefix)
+  # 192.168.0.0 - 192.168.255.255 (192.168/16 prefix)
+  # Replace the vpc and subnet cidr ranges based on the requirements
+
+  # Network Account
+  # Deploys the Inspection VPC
+  # Creates 4 subnets in each AZs
+  # Subnets includes untrust, trust, management and tgw attach
+  # This vpc host firewall appliances
+  - name: Inspection-VPC
+    account: Network
+    region: *HOME_REGION
+    ipamAllocations:
+      - ipamPoolName: accelerator-us-gov-east-1-regional-pool
+        netmaskLength: 19
+    internetGateway: true
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    resolverRules:
+      - accelerator-outbound-rule
+    routeTables:
+      - name: Inspection-Public-Rt-A
+        routes:
+          - name: GwlbRoute
+            destination: 10.0.0.0/8
+            type: gatewayLoadBalancerEndpoint
+            target: PaloAlto-Endpoint-A
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Inspection-Public-Rt-B
+        routes:
+          - name: GwlbRoute
+            destination: 10.0.0.0/8
+            type: gatewayLoadBalancerEndpoint
+            target: PaloAlto-Endpoint-B
+          - name: IgwRoute
+            destination: 0.0.0.0/0
+            type: internetGateway
+            target: IGW
+      - name: Inspection-Private-Rt-A
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Inspection-NatGw-A
+      - name: Inspection-Private-Rt-B
+        routes:
+          - name: NatRoute
+            destination: 0.0.0.0/0
+            type: natGateway
+            target: Inspection-NatGw-B
+#      - name: Inspection-Management-Public-Rt-A
+#        routes:
+#          - name: IgwRoute
+#            destination: 0.0.0.0/0
+#            type: internetGateway
+#            target: IGW
+#      - name: Inspection-Management-Public-Rt-B
+#        routes:
+#          - name: IgwRoute
+#            destination: 0.0.0.0/0
+#            type: internetGateway
+#            target: IGW
+      - name: Inspection-TgwAttach-Rt-A
+        routes:
+          - name: GwlbRoute
+            destination: 0.0.0.0/0
+            type: gatewayLoadBalancerEndpoint
+            target: PaloAlto-Endpoint-A
+      - name: Inspection-TgwAttach-Rt-B
+        routes:
+          - name: GwlbRoute
+            destination: 0.0.0.0/0
+            type: gatewayLoadBalancerEndpoint
+            target: PaloAlto-Endpoint-B
+    subnets:
+      - name: Inspection-Public-A
+        availabilityZone: a
+        routeTable: Inspection-Public-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: Inspection-Public-B
+        availabilityZone: b
+        routeTable: Inspection-Public-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: Inspection-Private-A
+        availabilityZone: a
+        routeTable: Inspection-Private-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: Inspection-Private-B
+        availabilityZone: b
+        routeTable: Inspection-Private-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+#      - name: Inspection-Management-A
+#        availabilityZone: a
+#        routeTable: Inspection-Management-Public-Rt-A
+#        ipamAllocation:
+#          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+#          netmaskLength: 24
+#      - name: Inspection-Management-B
+#        availabilityZone: b
+#        routeTable: Inspection-Management-Public-Rt-B
+#        ipamAllocation:
+#          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+#          netmaskLength: 24
+      - name: Inspection-TGW-Subnet-A
+        availabilityZone: a
+        routeTable: Inspection-TgwAttach-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: Inspection-TGW-Subnet-B
+        availabilityZone: b
+        routeTable: Inspection-TgwAttach-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+    securityGroups:
+    - name: firewall-mgmt-sg
+      description: Firewall Management security group
+      inboundRules:
+        - description: Firewall Management access security group rule
+          types:
+            - HTTPS
+            - SSH
+          sources:
+            - 10.0.0.0/8
+      outboundRules:
+        - description: Allow all outbound
+          types:
+            - ALL
+          sources:
+            - 0.0.0.0/0
+    - name: firewall-data-sg
+      description: Firewall Data security group
+      inboundRules:
+        - description: Firewall Management access security group rule
+          types:
+            - ALL
+          sources:
+            - 10.0.0.0/8
+      outboundRules:
+        - description: Allow all outbound
+          types:
+            - ALL
+          sources:
+            - 0.0.0.0/0
+    natGateways:
+      - name: Inspection-NatGw-A
+        subnet: Inspection-Public-A
+      - name: Inspection-NatGw-B
+        subnet: Inspection-Public-B
+    transitGatewayAttachments:
+      - name: Inspection
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Transit
+        routeTablePropagations:
+          - Network-Main-Central-Inspection
+        subnets:
+          - Inspection-TGW-Subnet-A
+          - Inspection-TGW-Subnet-B
+        option:
+          applianceModeSupport: enable
+
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+    
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      allowedCidrs: [10.0.16.0/16]
+      subnets: 
+        - Inspection-Private-A
+        - Inspection-Private-B
+      endpoints: 
+        - service: ec2
+        - service: sns
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages        
+
+  # Shared Services Account
+  # SharedServices-Main VPC
+  # This vpc creates 3 subnets in each AZs
+  # Subnets includes app, data and tgw attach.
+  ### This vpc host sharedsevices applications.
+  - name: SharedServices-Main
+    account: SharedServices
+    region: *HOME_REGION
+    ipamAllocations:
+      - ipamPoolName: accelerator-us-gov-east-1-regional-pool
+        netmaskLength: 22
+    internetGateway: false
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    resolverRules:
+      - accelerator-outbound-rule
+    routeTables:
+      - name: SharedServices-Main-App-Rt-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-Main-App-Rt-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-Main-Database-Rt-A
+      - name: SharedServices-Main-Database-Rt-B
+      - name: SharedServices-Main-TgwAttach-Rt-A
+      - name: SharedServices-Main-TgwAttach-Rt-B
+    subnets:
+      - name: SharedServices-Main-App-A
+        availabilityZone: a
+        routeTable: SharedServices-Main-App-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 25
+      - name: SharedServices-Main-App-B
+        availabilityZone: b
+        routeTable: SharedServices-Main-App-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 25
+      - name: SharedServices-Main-Database-A
+        availabilityZone: a
+        routeTable: SharedServices-Main-Database-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 25
+      - name: SharedServices-Main-Database-B
+        availabilityZone: b
+        routeTable: SharedServices-Main-Database-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 25
+      - name: SharedServices-Main-TgwAttach-A
+        availabilityZone: a
+        routeTable: SharedServices-Main-TgwAttach-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: SharedServices-Main-TgwAttach-B
+        availabilityZone: b
+        routeTable: SharedServices-Main-TgwAttach-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+    transitGatewayAttachments:
+      - name: SharedServices-Main
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Central-Inspection
+        routeTablePropagations:
+          - Network-Main-Transit
+        subnets:
+          - SharedServices-Main-TgwAttach-A
+          - SharedServices-Main-TgwAttach-B
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      allowedCidrs: [10.0.16.0/16]
+      subnets: 
+        - SharedServices-Main-App-A
+        - SharedServices-Main-App-B
+      endpoints: 
+        - service: ec2
+        - service: sns
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: rds 
+
+  # Shared Services Account
+  # SharedServices-Workspaces VPC
+  # This vpc creates 2 subnets, one in each AZ
+  ### This vpc host AWS workspaces used to access private applications
+  
+  - name: SharedServices-Workspaces-VPC
+    account: SharedServices
+    region: *HOME_REGION
+    ipamAllocations:
+      - ipamPoolName: accelerator-us-gov-east-1-regional-pool
+        netmaskLength: 21
+    internetGateway: false
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    resolverRules:
+      - accelerator-outbound-rule
+    routeTables:
+      - name: SharedServices-Workspaces-Rt-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-Workspaces-Rt-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-Workspaces-TgwAttach-Rt-A
+      - name: SharedServices-Workspaces-TgwAttach-Rt-B
+    subnets:
+      - name: SharedServices-Workspaces-A
+        availabilityZone: a
+        routeTable: SharedServices-Workspaces-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: SharedServices-Workspaces-B
+        availabilityZone: b
+        routeTable: SharedServices-Workspaces-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: SharedServices-Workspaces-TgwAttach-A
+        availabilityZone: a
+        routeTable: SharedServices-Workspaces-TgwAttach-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: SharedServices-Workspaces-TgwAttach-B
+        availabilityZone: b
+        routeTable: SharedServices-Workspaces-TgwAttach-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+    transitGatewayAttachments:
+      - name: SharedServices-Workspaces
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Central-Inspection
+        routeTablePropagations:
+          - Network-Main-Transit
+        subnets:
+          - SharedServices-Workspaces-TgwAttach-A
+          - SharedServices-Workspaces-TgwAttach-B
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      allowedCidrs: [10.0.16.0/16]
+      subnets: 
+        - SharedServices-Workspaces-A
+        - SharedServices-Workspaces-B
+      endpoints: 
+        - service: ec2
+        - service: sns
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages           
+
+  # SharedServices-EKS VPC
+  # This vpc creates 3 subnets in each AZs
+  # Subnets includes Worker, Ingress and tgw attach.
+  ### This vpc hosts an EKS Instance.
+  - name: SharedServices-EKS-VPC
+    account: SharedServices
+    region: *HOME_REGION
+    ipamAllocations:
+      - ipamPoolName: accelerator-us-gov-east-1-regional-pool
+        netmaskLength: 22
+    internetGateway: false
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    resolverRules:
+      - accelerator-outbound-rule
+    routeTables:
+      - name: SharedServices-EKS-Worker-Rt-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-EKS-Worker-Rt-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: SharedServices-EKS-Ingress-Rt-A
+      - name: SharedServices-EKS-Ingress-Rt-B
+      - name: SharedServices-EKS-TgwAttach-Rt-A
+      - name: SharedServices-EKS-TgwAttach-Rt-B
+    subnets:
+      - name: SharedServices-EKS-Worker-A
+        availabilityZone: a
+        routeTable: SharedServices-EKS-Worker-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: SharedServices-EKS-Worker-B
+        availabilityZone: b
+        routeTable: SharedServices-EKS-Worker-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 24
+      - name: SharedServices-EKS-Ingress-A
+        availabilityZone: a
+        routeTable: SharedServices-EKS-Ingress-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: SharedServices-EKS-Ingress-B
+        availabilityZone: b
+        routeTable: SharedServices-EKS-Ingress-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: SharedServices-EKS-TgwAttach-A
+        availabilityZone: a
+        routeTable: SharedServices-EKS-TgwAttach-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+      - name: SharedServices-EKS-TgwAttach-B
+        availabilityZone: b
+        routeTable: SharedServices-EKS-TgwAttach-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-regional-pool
+          netmaskLength: 28
+    transitGatewayAttachments:
+      - name: SharedServices-EKS
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Central-Inspection
+        routeTablePropagations:
+          - Network-Main-Transit
+        subnets:
+          - SharedServices-EKS-TgwAttach-A
+          - SharedServices-EKS-TgwAttach-B
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      allowedCidrs: [10.0.0.0/16]
+      subnets: 
+        - SharedServices-EKS-Worker-A
+        - SharedServices-EKS-Worker-B
+      endpoints: 
+        - service: ec2
+        - service: sns
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages 
+        - service: ecr.api
+        - service: ecr.dkr
+        - service: sts
+        - service: logs
+        
+# Accounts deployed in the workload OU
+# Workload-VPC
+# This vpc creates 2 private subnets, one in each AZ
+### This vpc hosts the workload applications deployed in workload accounts.
+
+vpcTemplates:
+  - name: Accelerator-Workload-VPC
+    deploymentTargets:
+      organizationalUnits:
+        - WorkloadAccounts
+    region: *HOME_REGION
+    ipamAllocations:
+      - ipamPoolName: accelerator-us-gov-east-1-dev-pool
+        netmaskLength: 24
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    instanceTenancy: default
+    resolverRules:
+      - accelerator-outbound-rule
+    routeTables:
+      - name: Accelerator-Private-Rt-A
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: Accelerator-Private-Rt-B
+        routes:
+          - name: TgwRoute
+            destination: 0.0.0.0/0
+            type: transitGateway
+            target: Network-Main
+      - name: Workload-Private-TgwAttach-Rt-A
+      - name: Workload-Private-TgwAttach-Rt-B
+    subnets:
+      - name: Workload-Private-Subnet-A
+        availabilityZone: a
+        routeTable: Accelerator-Private-Rt-A
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-dev-pool
+          netmaskLength: 26
+      - name: Workload-Private-Subnet-B
+        availabilityZone: b
+        routeTable: Accelerator-Private-Rt-B
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-dev-pool
+          netmaskLength: 26
+      - name: Workload-TgwAttach-A
+        availabilityZone: a
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-dev-pool
+          netmaskLength: 28
+        routeTable: Workload-Private-TgwAttach-Rt-A
+      - name: Workload-TgwAttach-B
+        availabilityZone: b
+        ipamAllocation:
+          ipamPoolName: accelerator-us-gov-east-1-dev-pool
+          netmaskLength: 28
+        routeTable: Workload-Private-TgwAttach-Rt-B
+    transitGatewayAttachments:
+      - name: Workload-VPC-Attachment
+        transitGateway:
+          name: Network-Main
+          account: Network
+        routeTableAssociations:
+          - Network-Main-Central-Inspection
+        routeTablePropagations:
+          - Network-Main-Transit
+        subnets:
+          - Workload-TgwAttach-A
+          - Workload-TgwAttach-B
+    gatewayEndpoints:
+      defaultPolicy: Default
+      endpoints:
+        - service: s3
+    
+    interfaceEndpoints:
+      central: false
+      defaultPolicy: Default
+      allowedCidrs: [10.0.16.0/21]
+      subnets: 
+        - Workload-Private-Subnet-A
+        - Workload-Private-Subnet-B
+      endpoints: 
+        - service: ec2
+        - service: ec2messages
+        - service: ssm
+        - service: ssmmessages
+        - service: kms
+        - service: logs
+
+##############################################################
+# Global configuration for VPC flow logs                     #
+# Where there is no flow log configuration defined with VPC  #
+# this configuration will be used for flow log configuration #
+##############################################################
+vpcFlowLogs:
+  trafficType: ALL
+  maxAggregationInterval: 600
+  destinations:
+    - cloud-watch-logs
+  destinationsConfig:
+    cloudWatchLogs:
+      retentionInDays: 30
+  defaultFormat: false
+  customFields:
+    - version
+    - account-id
+    - interface-id
+    - srcaddr
+    - dstaddr
+    - srcport
+    - dstport
+    - protocol
+    - packets
+    - bytes
+    - start
+    - end
+    - action
+    - log-status
+    - vpc-id
+    - subnet-id
+    - instance-id
+    - tcp-flags
+    - type
+    - pkt-srcaddr
+    - pkt-dstaddr
+    - region
+    - az-id
+    - pkt-src-aws-service
+    - pkt-dst-aws-service
+    - flow-direction
+    - traffic-path
