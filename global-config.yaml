@@ -11,7 +11,7 @@ managementAccountAccessRole: AWSControlTowerExecution
 # Update the retention time based on compliance and auditing requirements
 # Defining and storing cloudwatch logs for 365 days
 cloudwatchLogRetentionInDays: 5
-terminationProtection: true
+terminationProtection: false
 cdkOptions:
   centralizeBuckets: true
   useManagementAccessRole: true
