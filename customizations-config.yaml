@@ -2,84 +2,84 @@ customizations:
 firewalls:
   instances:
     - name: accelerator-firewall-a
-      launchTemplate:
-        name: firewall-lt-a
-        blockDeviceMappings:
-          - deviceName: /dev/xvda
-            ebs:
-              deleteOnTermination: true
-              encrypted: true
-              volumeSize: 70
-        enforceImdsv2: false
-        securityGroups: []
-        keyPair: palo-alto-key
-        iamInstanceProfile: NGFW-Profile
-        imageId: ami-0c7cf1a51fd31e1a6
-        instanceType: c5n.xlarge
-        networkInterfaces:
-          - deleteOnTermination: true
-            description: Management/Trust interface
-            deviceIndex: 0
-            sourceDestCheck: false
-            groups: 
-              - firewall-data-sg
-              - firewall-mgmt-sg
-            subnetId: Inspection-Private-A  
-          - deleteOnTermination: true
-            description: Untrust interface
-            deviceIndex: 1
-            sourceDestCheck: false
-            groups: 
-              - firewall-data-sg
-            subnetId: Inspection-Public-A
-        # configure-hairpin.txt configures hairpin mode on Amazon Linux AMI appliance placeholder instances.
-        # userData: hairpin-test/configure-hairpin.txt
-        userData: ec2userdata/firewall-a-bootstrap.txt
-      vpc: Inspection-VPC
-    - name: accelerator-firewall-b
-      launchTemplate:
-        name: firewall-lt-b
-        blockDeviceMappings:
-          - deviceName: /dev/xvda
-            ebs:
-              deleteOnTermination: true
-              encrypted: true
-              volumeSize: 70
-        enforceImdsv2: false
-        securityGroups: []
-        keyPair: palo-alto-key
-        iamInstanceProfile: NGFW-Profile
-        imageId: ami-0c7cf1a51fd31e1a6
-        instanceType: c5n.xlarge
-        networkInterfaces:
-          - deleteOnTermination: true
-            description: Management/Trust interface
-            deviceIndex: 0
-            sourceDestCheck: false          
-            groups: 
-              - firewall-data-sg
-              - firewall-mgmt-sg
-            subnetId: Inspection-Private-B 
-          - deleteOnTermination: true
-            description: Untrust interface
-            deviceIndex: 1
-            sourceDestCheck: false
-            groups: 
-              - firewall-data-sg
-            subnetId: Inspection-Public-B     
-        # configure-hairpin.txt configures hairpin mode on Amazon Linux AMI appliance placeholder instances.
-        # userData: hairpin-test/configure-hairpin.txt
-        userData: ec2userdata/firewall-b-bootstrap.txt
-      vpc: Inspection-VPC
+      # launchTemplate:
+      #   name: firewall-lt-a
+      #   blockDeviceMappings:
+      #     - deviceName: /dev/xvda
+      #       ebs:
+      #         deleteOnTermination: true
+      #         encrypted: true
+      #         volumeSize: 70
+      #   enforceImdsv2: false
+      #   securityGroups: []
+      #   keyPair: palo-alto-key
+      #   iamInstanceProfile: NGFW-Profile
+      #   imageId: ami-0c7cf1a51fd31e1a6
+      #   instanceType: c5n.xlarge
+      #   networkInterfaces:
+      #     - deleteOnTermination: true
+      #       description: Management/Trust interface
+      #       deviceIndex: 0
+      #       sourceDestCheck: false
+      #       groups: 
+      #         - firewall-data-sg
+      #         - firewall-mgmt-sg
+      #       subnetId: Inspection-Private-A  
+      #     - deleteOnTermination: true
+      #       description: Untrust interface
+      #       deviceIndex: 1
+    #         sourceDestCheck: false
+    #         groups: 
+    #           - firewall-data-sg
+    #         subnetId: Inspection-Public-A
+    #     # configure-hairpin.txt configures hairpin mode on Amazon Linux AMI appliance placeholder instances.
+    #     # userData: hairpin-test/configure-hairpin.txt
+    #     userData: ec2userdata/firewall-a-bootstrap.txt
+    #   vpc: Inspection-VPC
+    # - name: accelerator-firewall-b
+    #   launchTemplate:
+    #     name: firewall-lt-b
+    #     blockDeviceMappings:
+    #       - deviceName: /dev/xvda
+    #         ebs:
+    #           deleteOnTermination: true
+    #           encrypted: true
+    #           volumeSize: 70
+    #     enforceImdsv2: false
+    #     securityGroups: []
+    #     keyPair: palo-alto-key
+    #     iamInstanceProfile: NGFW-Profile
+    #     imageId: ami-0c7cf1a51fd31e1a6
+    #     instanceType: c5n.xlarge
+    #     networkInterfaces:
+    #       - deleteOnTermination: true
+    #         description: Management/Trust interface
+    #         deviceIndex: 0
+    #         sourceDestCheck: false          
+    #         groups: 
+    #           - firewall-data-sg
+    #           - firewall-mgmt-sg
+    #         subnetId: Inspection-Private-B 
+    #       - deleteOnTermination: true
+    #         description: Untrust interface
+    #         deviceIndex: 1
+    #         sourceDestCheck: false
+    #         groups: 
+    #           - firewall-data-sg
+    #         subnetId: Inspection-Public-B     
+    #     # configure-hairpin.txt configures hairpin mode on Amazon Linux AMI appliance placeholder instances.
+    #     # userData: hairpin-test/configure-hairpin.txt
+    #     userData: ec2userdata/firewall-b-bootstrap.txt
+    #   vpc: Inspection-VPC
   targetGroups:
     - name: PaloAlto-TargetGroup
-      port: 6081
-      protocol: GENEVE
-      type: instance
-      healthCheck:
-        enabled: true
-        port: 80
-        protocol: TCP
-      targets:
-        - accelerator-firewall-a
-        - accelerator-firewall-b
+      # port: 6081
+      # protocol: GENEVE
+      # type: instance
+      # healthCheck:
+      #   enabled: true
+      #   port: 80
+      #   protocol: TCP
+      # targets:
+      #   - accelerator-firewall-a
+      #   - accelerator-firewall-b
