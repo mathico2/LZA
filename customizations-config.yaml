@@ -1,4 +1,4 @@
-customizations:
+#customizations:
 firewalls:
   instances:
     - name: accelerator-firewall-a
@@ -71,7 +71,7 @@ firewalls:
         # userData: hairpin-test/configure-hairpin.txt
         userData: ec2userdata/firewall-b-bootstrap.txt
       vpc: Inspection-VPC
-  targetGroup:
+  targetGroups:
     - name: PaloAlto-TargetGroup
       port: 6081
       protocol: GENEVE
