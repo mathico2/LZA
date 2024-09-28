@@ -35,4 +35,4 @@ workloadAccounts:
     description: The customer1 account
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awsindigosquare@gmail.com
-    organizationalUnit: workload
+    organizationalUnit: Workload
