@@ -21,18 +21,18 @@ workloadAccounts:
   # The "name" will be used to set the AWS Account name
   # The "name" value does not currently support spaces
   # The "name" value DOES NOT need to match the account name
-  # - name: SharedServices
-  #   description: The SharedServices account
-  #   #email: <shared-services>@example.com  <----- UPDATE EMAIL ADDRESS
-  #   email: sharedawsservices01@gmail.com
-  #   organizationalUnit: Infrastructure
-  # - name: Network
-  #   description: The Network account
-  #   #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
-  #   email: awschristianlogarchive01@gmail.com
-  #   organizationalUnit: Infrastructure
-  # - name: customer1
-  #   description: The customer1 account
-  #   #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
-  #   email: awsindigosquare@gmail.com
-  #   organizationalUnit: Workload
+  - name: SharedServices
+    description: The SharedServices account
+    #email: <shared-services>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: sharedawsservices01@gmail.com
+    organizationalUnit: Infrastructure
+  - name: Network
+    description: The Network account
+    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: awschristianlogarchive01@gmail.com
+    organizationalUnit: Infrastructure
+  - name: customer1
+    description: The customer1 account
+    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+    email: awsindigosquare@gmail.com
+    organizationalUnit: Workload
