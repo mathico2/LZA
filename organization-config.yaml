@@ -20,9 +20,9 @@ organizationalUnits:
   #- name: Suspend
   - name: Infrastructure
   - name: WorkloadAccounts
-  - name: WorkloadAccounts/SandboxZone
-  - name: WorkloadAccounts/TestingZone
-  - name: WorkloadAccounts/CodingZone
+  # - name: WorkloadAccounts/SandboxZone
+  # - name: WorkloadAccounts/TestingZone
+  # - name: WorkloadAccounts/CodingZone
 # Enabling the quarantine service control policies (SCPs)
 quarantineNewAccounts:
   enable: true
