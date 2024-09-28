@@ -31,8 +31,8 @@ workloadAccounts:
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awschristianlogarchive01@gmail.com
     organizationalUnit: Infrastructure
-  - name: customer1
-    description: The customer1 account
-    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
-    email: awsindigosquare@gmail.com
-    organizationalUnit: Workload
+  # - name: customer1
+  #   description: The customer1 account
+  #   #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
+  #   email: awsindigosquare@gmail.com
+  #   organizationalUnit: Workload
