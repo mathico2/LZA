@@ -81,7 +81,7 @@ centralNetworkServices:
           - Inspection-Private-B
         rules:
           - name: accelerator-outbound-rule
-            domainName: spds.com
+            domainName: indigo.com
             ruleType: FORWARD
             shareTargets:
               organizationalUnits:

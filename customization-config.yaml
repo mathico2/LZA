@@ -72,14 +72,14 @@ firewalls:
         userData: ec2userdata/firewall-b-bootstrap.txt
       vpc: Inspection-VPC
   targetGroups:
-    - name: PaloAlto-TargetGroup
-      port: 6081
-      protocol: GENEVE
-      type: instance
-      healthCheck:
-        enabled: true
-        port: 80
-        protocol: TCP
+  - name: PaloAlto-TargetGroup
+    port: 6081
+    protocol: GENEVE
+    type: instance
+    healthCheck:
+      enabled: true
+      port: 80
+      protocol: TCP
       targets:
         - accelerator-firewall-a
         - accelerator-firewall-b
