@@ -83,5 +83,3 @@ firewalls:
       targets:
         - accelerator-firewall-a
         - accelerator-firewall-b
-Feedback
-Language
