@@ -3,20 +3,32 @@ mandatoryAccounts:
   # The "name" value does not currently support spaces
   # The "name" value DOES NOT need to match the account name
   - name: Management
-    description: The management (primary) account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    description: >-
+      The management (primary) account. Do not change the name field for this
+      mandatory account. Note, the account name key does not need to match the
+      AWS account name. 
     #email: <management-account>@example.com <----- UPDATE EMAIL ADDRESS
     email: mathico2@outlook.com
     organizationalUnit: Root
+    warm: false
   - name: LogArchive
-    description: The log archive account. Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    description: >-
+      The log archive account. Do not change the name field for this mandatory
+      account. Note, the account name key does not need to match the AWS account
+      name.
     #email: <log-archive>@example.com  <----- UPDATE EMAIL ADDRESS
     email: log_archive01@yahoo.com
     organizationalUnit: Security
+    warm: false
   - name: Audit
-    description: The security audit account (also referred to as the audit account). Do not change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+    description: >-
+      The security audit account (also referred to as the audit account). Do not
+      change the name field for this mandatory account. Note, the account name
+      key does not need to match the AWS account name.
     #email: <audit>@example.com  <----- UPDATE EMAIL ADDRESS
     email: auditaws01@yahoo.com
     organizationalUnit: Security
+    warm: false
 workloadAccounts:
   # The "name" will be used to set the AWS Account name
   # The "name" value does not currently support spaces
@@ -31,8 +43,12 @@ workloadAccounts:
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awschristianlogarchive01@gmail.com
     organizationalUnit: Infrastructure
-  - name: customer1
-    description: The customer1 account
+  - name: indigo
+    description: workload customer1 account
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awsindigosquare@gmail.com
-    organizationalUnit: Workload
+    organizationalUnit: WorkloadAccounts
+accountIds:
+  - email: awsindigosquare@gmail.com
+    accountId: '577638391811'
+   
