@@ -15,11 +15,17 @@ enable: true
 # Creating OUs
 organizationalUnits:
   - name: Security
+    ignore: true
   - name: Workload
+    ignore: true
   - name: Forensic
+    ignore: true
   - name: Suspend
+    ignore: true
   - name: Infrastructure
+    ignore: true
   - name: WorkloadAccounts
+    ignore: true
   #- name: WorkloadAccounts/SandboxZone
   #- name: WorkloadAccounts/TestingZone
   #- name: WorkloadAccounts/CodingZone
