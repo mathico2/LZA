@@ -756,6 +756,3 @@ vpcFlowLogs:
     - pkt-dst-aws-service
     - flow-direction
     - traffic-path
-
-Feedback
-Language
