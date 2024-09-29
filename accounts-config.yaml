@@ -37,7 +37,7 @@ workloadAccounts:
     description: The SharedServices account
     email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
-  - name: Network
+  - name: network
     description: The Network account
     email: awschristiannetwork01@outlook.com
     organizationalUnit: Infrastructure
