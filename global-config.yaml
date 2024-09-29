@@ -24,7 +24,7 @@ snsTopics:
       emailAddresses:
         - auditaws01@yahoo.com
 controlTower:
-  enable: false
+  enable: true
 logging:
   account: LogArchive
   cloudtrail:
