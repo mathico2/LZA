@@ -44,7 +44,7 @@ workloadAccounts:
     email: awschristiannetwork01@outlook.com
     organizationalUnit: Infrastructure
   - name: indigo
-    description: workload customer1 account
+    description: customer workload account
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awsindigosquare@gmail.com
     organizationalUnit: WorkloadAccounts
@@ -57,7 +57,7 @@ accountIds:
     accountId: '891612544213'
   - email: auditaws01@yahoo.com
     accountId: '050451371445'
-  # - email: sharedawsservices01@gmail.com
-  #   accountId: '000000000000'
-  # - email: awschristianlogarchive01@gmail.com
-  #   accountId: '000000000000'
+  - email: SharedServicesaws01@outlook.com
+    accountId: '412381767216'
+  - email: awschristiannetwork01@outlook.com
+    accountId: '390402569936'

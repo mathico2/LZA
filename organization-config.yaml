@@ -12,6 +12,13 @@
 # AWS Organizations and Organizational Units (OUs) Configurations #
 ###################################################################
 enable: true
+# Enabling Control Tower
+controlTower:
+  enable: true
+  # controlTowerRegions:
+  #   - us-east-1
+  #   - us-west-2
+  #   - eu-west-1
 # Creating OUs
 organizationalUnits:
   - name: Security
