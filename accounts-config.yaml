@@ -36,12 +36,12 @@ workloadAccounts:
   - name: SharedServices
     description: The SharedServices account
     #email: <shared-services>@example.com  <----- UPDATE EMAIL ADDRESS
-    email: sharedawsservices01@gmail.com
+    email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
   - name: Network
     description: The Network account
     #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
-    email: awschristianlogarchive01@gmail.com
+    email: awschristiannetwork01@outlook.com
     organizationalUnit: Infrastructure
   - name: indigo
     description: workload customer1 account
