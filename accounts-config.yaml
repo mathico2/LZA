@@ -35,17 +35,14 @@ workloadAccounts:
   # The "name" value DOES NOT need to match the account name
   - name: SharedServices
     description: The SharedServices account
-    #email: <shared-services>@example.com  <----- UPDATE EMAIL ADDRESS
     email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
   - name: Network
     description: The Network account
-    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awschristiannetwork01@outlook.com
     organizationalUnit: Infrastructure
   - name: indigo
     description: customer workload account
-    #email: <network>@example.com  <----- UPDATE EMAIL ADDRESS
     email: awsindigosquare@gmail.com
     organizationalUnit: WorkloadAccounts
 accountIds:
