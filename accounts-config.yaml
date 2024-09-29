@@ -37,7 +37,7 @@ workloadAccounts:
     description: The SharedServices account
     email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
-  - name: network
+  - name: Network
     description: The Network account
     email: awschristiannetwork01@outlook.com
     organizationalUnit: Infrastructure
@@ -45,16 +45,16 @@ workloadAccounts:
     description: customer workload account
     email: awsindigosquare@gmail.com
     organizationalUnit: WorkloadAccounts
-# accountIds:
-#   - email: awsindigosquare@gmail.com
-#     accountId: '577638391811'
-#   - email: mathico2@outlook.com
-#     accountId: '235589280087'
-#   - email: log_archive01@yahoo.com
-#     accountId: '891612544213'
-#   - email: auditaws01@yahoo.com
-#     accountId: '050451371445'
-#   - email: SharedServicesaws01@outlook.com
-#     accountId: '412381767216'
-#   - email: awschristiannetwork01@outlook.com
-#     accountId: '390402569936'
+accountIds:
+  - email: awsindigosquare@gmail.com
+    accountId: '577638391811'
+  - email: mathico2@outlook.com
+    accountId: '235589280087'
+  - email: log_archive01@yahoo.com
+    accountId: '891612544213'
+  - email: auditaws01@yahoo.com
+    accountId: '050451371445'
+  - email: SharedServicesaws01@outlook.com
+    accountId: '412381767216'
+  - email: awschristiannetwork01@outlook.com
+    accountId: '390402569936'
