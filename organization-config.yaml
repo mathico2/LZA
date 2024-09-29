@@ -13,8 +13,8 @@
 ###################################################################
 enable: true
 # Enabling Control Tower
-controlTower:
-  enable: true
+# controlTower:
+#   enable: true
   # controlTowerRegions:
   #   - us-east-1
   #   - us-west-2
