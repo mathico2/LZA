@@ -21,6 +21,7 @@ enable: true
   #   - eu-west-1
 # Creating OUs
 organizationalUnits:
+  - name: SuspendAccounts
   - name: Security
   - name: Infrastructure
   - name: WorkloadAccounts

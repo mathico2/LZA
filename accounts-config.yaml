@@ -37,9 +37,13 @@ workloadAccounts:
     description: The SharedServices account
     email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
-  - name: network
-    description: The Network account
+  - name: Test
+    description: Test Sandbox Account
     email: awschristiannetwork01@outlook.com
+    organizationalUnit: WorkloadAccounts 
+  - name: Network
+    description: The Network account
+    email: AWSNetwork01@outlook.com
     organizationalUnit: Infrastructure
   - name: awsindigosquare-workload
     description: customer workload account
@@ -56,5 +60,7 @@ accountIds:
     accountId: '050451371445'
   - email: SharedServicesaws01@outlook.com
     accountId: '412381767216'
-  - email: awschristiannetwork01@outlook.com
-    accountId: '390402569936'
+  - email: AWSNetwork01@outlook.com
+    accountId: '715841366587'
+  email: AWSNetwork01@outlook.com
+    accountId: '390402569936'  
