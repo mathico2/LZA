@@ -1,130 +1,66 @@
-# mandatoryAccounts:
-#   # We recommend you do not change mandatory account names. These are used within Landing Zone Accelerator to reference the accounts from other config files.
-#   # The "name" value does not currently support spaces
-#   # The "name" value DOES NOT need to match the account name
-#   - name: Management
-#     description: >-
-#       The management (primary) account. Do not change the name field for this
-#       mandatory account. Note, the account name key does not need to match the
-#       AWS account name. 
-#     #email: <management-account>@example.com <----- UPDATE EMAIL ADDRESS
-#     email: mathico2@outlook.com
-#     organizationalUnit: Root
-#     warm: false
-#   - name: LogArchive
-#     description: >-
-#       The log archive account. Do not change the name field for this mandatory
-#       account. Note, the account name key does not need to match the AWS account
-#       name.
-#     #email: <log-archive>@example.com  <----- UPDATE EMAIL ADDRESS
-#     email: log_archive01@yahoo.com
-#     organizationalUnit: Security
-#     warm: false
-#   - name: Audit
-#     description: >-
-#       The security audit account (also referred to as the audit account). Do not
-#       change the name field for this mandatory account. Note, the account name
-#       key does not need to match the AWS account name.
-#     #email: <audit>@example.com  <----- UPDATE EMAIL ADDRESS
-#     email: auditaws01@yahoo.com
-#     organizationalUnit: Security
-#     warm: false
-# workloadAccounts:
-#   # The "name" will be used to set the AWS Account name
-#   # The "name" value does not currently support spaces
-#   # The "name" value DOES NOT need to match the account name
-#   - name: SharedServices
-#     description: The SharedServices account
-#     email: SharedServicesaws01@outlook.com
-#     organizationalUnit: Infrastructure
-#   - name: Test
-#     description: Test Sandbox Account
-#     email: awschristiannetwork01@outlook.com
-#     organizationalUnit: WorkloadAccounts 
-#   - name: Network
-#     description: The Network account
-#     email: AWSNetwork01@outlook.com
-#     organizationalUnit: Infrastructure
-#   - name: awsindigosquare-workload
-#     description: customer workload account
-#     email: awsindigosquare@gmail.com
-#     organizationalUnit: WorkloadAccounts
-# accountIds:
-#   - email: awsindigosquare@gmail.com
-#     accountId: '577638391811'
-#   - email: mathico2@outlook.com
-#     accountId: '235589280087'
-#   - email: log_archive01@yahoo.com
-#     accountId: '891612544213'
-#   - email: auditaws01@yahoo.com
-#     accountId: '050451371445'
-#   - email: SharedServicesaws01@outlook.com
-#     accountId: '412381767216'
-#   - email: AWSNetwork01@outlook.com
-#     accountId: '715841366587'
-#   - email: AWSNetwork01@outlook.com
-#     accountId: '390402569936'  
-
 mandatoryAccounts:
+  # We recommend you do not change mandatory account names. These are used within Landing Zone Accelerator to reference the accounts from other config files.
+  # The "name" value does not currently support spaces
+  # The "name" value DOES NOT need to match the account name
   - name: Management
     description: >-
       The management (primary) account. Do not change the name field for this
       mandatory account. Note, the account name key does not need to match the
-      AWS account name.
+      AWS account name. 
+    #email: <management-account>@example.com <----- UPDATE EMAIL ADDRESS
     email: mathico2@outlook.com
     organizationalUnit: Root
     warm: false
-    accountId: "{{account.Management}}"  # Using variable reference here
-
   - name: LogArchive
     description: >-
       The log archive account. Do not change the name field for this mandatory
       account. Note, the account name key does not need to match the AWS account
       name.
+    #email: <log-archive>@example.com  <----- UPDATE EMAIL ADDRESS
     email: log_archive01@yahoo.com
     organizationalUnit: Security
     warm: false
-    accountId: "{{account.LogArchive}}"  # Using variable reference here
-
   - name: Audit
     description: >-
       The security audit account (also referred to as the audit account). Do not
-      change the name field for this mandatory account. Note, the account name key does not need to match the AWS account name.
+      change the name field for this mandatory account. Note, the account name
+      key does not need to match the AWS account name.
+    #email: <audit>@example.com  <----- UPDATE EMAIL ADDRESS
     email: auditaws01@yahoo.com
     organizationalUnit: Security
     warm: false
-    accountId: "{{account.Audit}}"  # Using variable reference here
-
 workloadAccounts:
+  # The "name" will be used to set the AWS Account name
+  # The "name" value does not currently support spaces
+  # The "name" value DOES NOT need to match the account name
   - name: SharedServices
     description: The SharedServices account
     email: SharedServicesaws01@outlook.com
     organizationalUnit: Infrastructure
-    accountId: "{{account.SharedServices}}"  # Using variable reference here
-
   - name: Test
     description: Test Sandbox Account
     email: awschristiannetwork01@outlook.com
-    organizationalUnit: WorkloadAccounts
-    accountId: "{{account.Test}}"  # Using variable reference here
-
+    organizationalUnit: WorkloadAccounts 
   - name: Network
     description: The Network account
     email: AWSNetwork01@outlook.com
     organizationalUnit: Infrastructure
-    accountId: "{{account.Network}}"  # Using variable reference here
-
   - name: awsindigosquare-workload
-    description: Customer workload account
+    description: customer workload account
     email: awsindigosquare@gmail.com
     organizationalUnit: WorkloadAccounts
-    accountId: "{{account.awsindigosquare}}"  # Using variable reference here
-
 accountIds:
-  - Management: '235589280087'
-  - LogArchive: '891612544213'
-  - Audit: '050451371445'
-  - SharedServices: '412381767216'
-  - Network: '715841366587'
-  - Test: '577638391811'
-  - awsindigosquare: '577638391811'
+  - email: awsindigosquare@gmail.com
+    accountId: '577638391811'
+  - email: mathico2@outlook.com
+    accountId: '235589280087'
+  - email: log_archive01@yahoo.com
+    accountId: '891612544213'
+  - email: auditaws01@yahoo.com
+    accountId: '050451371445'
+  - email: SharedServicesaws01@outlook.com
+    accountId: '412381767216'
+  - email: AWSNetwork01@outlook.com
+    accountId: '715841366587'
+  - email: AWSNetwork01@outlook.com
+    accountId: '390402569936'  
