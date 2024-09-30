@@ -62,5 +62,5 @@ accountIds:
     accountId: '412381767216'
   - email: AWSNetwork01@outlook.com
     accountId: '715841366587'
-  email: AWSNetwork01@outlook.com
+  - email: AWSNetwork01@outlook.com
     accountId: '390402569936'  
