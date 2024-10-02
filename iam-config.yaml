@@ -116,7 +116,7 @@ identityCenter:
         awsManaged:
           - arn:aws:iam::aws:policy/AdministratorAccess          
       sessionDuration: 480
-    - name: AWSAccelerator-LimitedAdminAccess #This role gets restricted in the guardrails. So unless you're on indigo you are ADMIN minus whatever we disable.
+    - name: AWSAccelerator-LimitAdminAccess #This role gets restricted in the guardrails. So unless you're on indigo you are ADMIN minus whatever we disable.
       policies:
         awsManaged:
           - arn:aws:iam::aws:policy/AdministratorAccess          
